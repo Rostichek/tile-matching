@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>GameField.qml</file>
+        <file>Ball.qml</file>
+    </qresource>
+</RCC>
