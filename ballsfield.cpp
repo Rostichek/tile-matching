@@ -8,7 +8,7 @@
 #include <QJsonArray>
 #include <exception>
 
-BallsField::BallsField(QObject *parent) : QAbstractListModel(parent), balls(m_columns)
+BallsField::BallsField(QObject *parent) : QAbstractListModel(parent)
 {
   QFile properties_file;
 
@@ -20,6 +20,7 @@ BallsField::BallsField(QObject *parent) : QAbstractListModel(parent), balls(m_co
   QJsonDocument properties_document;
   properties_document = QJsonDocument::fromJson(data);
   m_columns = properties_document.object()["columns"].toInt();
+  balls.resize(m_columns);
 
   auto json_palette = properties_document.object()["palette"].toArray();
   for(const auto& color : json_palette)
