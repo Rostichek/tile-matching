@@ -27,3 +27,6 @@ HEADERS += \
     FieldPlugin.h \
     ballsfield.h \
     field.h
+
+DISTFILES += \
+    properties.json

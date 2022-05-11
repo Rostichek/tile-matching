@@ -2,9 +2,31 @@
 #include <random>
 #include <set>
 #include <QDebug>
+#include <QFile>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <exception>
 
 BallsField::BallsField(QObject *parent) : QAbstractListModel(parent), balls(m_columns)
-{}
+{
+  QFile properties_file;
+
+  properties_file.setFileName("/home/rokoval/TileMatching/properties.json");
+  if(!properties_file.open(QIODevice::ReadOnly))
+    throw std::runtime_error("propertoe.json doesn't exist");
+
+  QByteArray data = properties_file.readAll();
+  QJsonDocument properties_document;
+  properties_document = QJsonDocument::fromJson(data);
+  m_columns = properties_document.object()["columns"].toInt();
+
+  auto json_palette = properties_document.object()["palette"].toArray();
+  for(const auto& color : json_palette)
+    palette.emplace_back(color.toString().toStdString());
+
+  return;
+}
 
 BallsField::Color& BallsField::get(size_t index) {
   return balls[index / m_rows][index % m_rows];
@@ -90,7 +112,7 @@ void BallsField::findBallsToRemove(size_t index, size_t iter) {
       if(get(second_ball) == get(basic_ball) && !indexes_to_remove.count(second_ball))
         findBallsToRemove(second_ball, iter + 1);
     }
-  if(index + 1 != balls.size() && (index + 1) % m_columns) {// left
+  if(index + 1 != balls.size() && (index + 1) % m_columns) { // left
       second_ball = index + 1;
       if(get(second_ball) == get(basic_ball) && !indexes_to_remove.count(second_ball))
         findBallsToRemove(second_ball, iter + 1);

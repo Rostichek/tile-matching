@@ -21,7 +21,7 @@ public:
 
   Q_INVOKABLE void selectBall(int index);
 
-  Q_PROPERTY(int columns MEMBER m_columns NOTIFY columnsChanged);
+  Q_PROPERTY(int columns MEMBER m_columns CONSTANT);
   Q_PROPERTY(int rows MEMBER m_rows NOTIFY rowsChanged);
 
 Q_SIGNALS:
@@ -42,9 +42,11 @@ private:
   void swapUp(size_t);
 
 private:
-  const std::vector<Color> palette { "red", "green", "blue", "purple", "yellow", "orange"}; // to implement by JSON
-  size_t m_columns = 7;
+  std::vector<Color> palette;
+  size_t m_columns;
   size_t m_rows;
+  size_t score = 0;
+  size_t points_counter = 0;
   int selected_idx = -1;
 
   mutable std::vector<std::vector<Color>> balls;
