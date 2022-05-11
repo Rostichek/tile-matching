@@ -4,6 +4,7 @@
 #include <QAbstractListModel>
 #include <vector>
 #include <string>
+#include <unordered_set>
 
 class BallsField : public QAbstractListModel
 {
@@ -33,10 +34,16 @@ private:
   size_t m_rows;
   int selected_idx = -1;
   mutable std::vector<std::vector<Color>> balls;
+  std::unordered_set<size_t> indexes_to_remove;
 
 private:
   void CreateBalls() const;
-  void move(const int);
+  bool move(const int);
+  void findBallsToRemove(size_t index, size_t iter = 0);
+  void removeBallsGroup();
+  Color& get(size_t index);
+  void swapUp(size_t);
+  Color getRandomColor() const;
 
 };
 #endif // BALLSFIELD_H
