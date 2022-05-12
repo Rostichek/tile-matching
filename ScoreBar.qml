@@ -7,7 +7,6 @@ Rectangle {
     id: root
 
     rotation: 180
-
     color: "lightgray"
 
     RowLayout {
@@ -17,28 +16,28 @@ Rectangle {
             Layout.preferredWidth: root.width / 3
             Layout.preferredHeight: root.height
             text: "Restart"
-            onClicked: balls_model.createBalls()
+            onClicked: _balls_model.createBalls()
         }
         Item {
-            id: score
+            id: _score
             Layout.preferredWidth: root.width / 3
             Layout.preferredHeight: root.height
             Text {
-                anchors.fill: score
+                anchors.fill: _score
                 horizontalAlignment: Text.AlignHCenter
                 anchors.topMargin: (root.height - font.pixelSize) / 3
-                text: "Score: " + balls_model.score
+                text: "Score: " + _balls_model.score
             }
         }
         Item {
-            id: steps
+            id: _steps
             Layout.preferredWidth: root.width / 3
             Layout.preferredHeight: root.height
             Text {
-                anchors.fill: steps
+                anchors.fill: _steps
                 horizontalAlignment: Text.AlignHCenter
                 anchors.topMargin: (root.height - font.pixelSize) / 3
-                text: "Steps: " + balls_model.steps
+                text: "Steps: " + _balls_model.steps
             }
         }
     }

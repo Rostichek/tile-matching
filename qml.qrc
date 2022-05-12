@@ -4,5 +4,6 @@
         <file>GameField.qml</file>
         <file>Ball.qml</file>
         <file>ScoreBar.qml</file>
+        <file>GameOverPopup.qml</file>
     </qresource>
 </RCC>
