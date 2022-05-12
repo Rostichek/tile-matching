@@ -104,8 +104,12 @@ void BallsField::createBalls() {
 
   indexes_to_remove.clear();
   model_setted = true;
-
   endResetModel();
+
+  m_score = 0;
+  m_steps = 0;
+  emit scoreChanged();
+  emit stepsChanged();
 
   return;
 }

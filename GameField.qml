@@ -1,10 +1,12 @@
 import QtQuick 2.0
 import BallsField 1.0
+import QtQuick.Controls 2.12
+import QtQuick.Layouts 1.12
 
 Item {
     id: root
 
-    property int animDuration: 300
+    property int animDuration: 500
 
     Item {
         rotation: 180
@@ -35,7 +37,11 @@ Item {
                 onSelect: balls_model.selectBall(index)
             }
 
-            header: scoreBar
+            header: ScoreBar {
+                id: scoreBar
+                width: root.width
+                height: balls.cellHeight / 2
+            }
 
             move: ballsTransition
         }
@@ -46,42 +52,6 @@ Item {
             NumberAnimation {
                 properties: "x, y"
                 duration: animDuration
-            }
-        }
-    }
-
-    Component {
-        id: scoreBar
-
-        Rectangle {
-            id: bg
-            width: root.width
-            height: balls.cellHeight / 2
-
-            rotation: 180
-
-            color: "lightgray"
-
-            Item {
-                id: text_holder
-
-                height: bg.height
-                width: 70
-
-                anchors {
-                    left: bg.left
-                    top: bg.top
-                    leftMargin: 10
-                    topMargin: (bg.height - score.font.pixelSize) / 3
-                }
-
-                Text {
-                    id: score
-
-                    anchors.fill: parent
-
-                    text: "Score: " + balls_model.score + "\tSteps: " + balls_model.steps
-                }
             }
         }
     }

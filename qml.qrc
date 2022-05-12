@@ -3,5 +3,6 @@
         <file>main.qml</file>
         <file>GameField.qml</file>
         <file>Ball.qml</file>
+        <file>ScoreBar.qml</file>
     </qresource>
 </RCC>
