@@ -1,10 +1,10 @@
 #ifndef BALLSFIELD_H
 #define BALLSFIELD_H
 
-#include <QAbstractListModel>
 #include <vector>
 #include <string>
 #include <unordered_set>
+#include <QAbstractListModel>
 
 class BallsField : public QAbstractListModel
 {
@@ -23,9 +23,8 @@ public:
   Q_INVOKABLE int getScore() const;
   Q_INVOKABLE void createBalls();
 
-
-  Q_PROPERTY(int columns MEMBER m_columns CONSTANT);
-  Q_PROPERTY(int rows MEMBER m_rows NOTIFY rowsChanged);
+  Q_PROPERTY(int columns MEMBER m_columns CONSTANT); // set by properties
+  Q_PROPERTY(int rows MEMBER m_rows NOTIFY rowsChanged); // computing by screen height and columns number
   Q_PROPERTY(int score MEMBER m_score NOTIFY scoreChanged);
   Q_PROPERTY(int steps MEMBER m_steps NOTIFY stepsChanged);
 
@@ -37,35 +36,56 @@ Q_SIGNALS:
 
 private:
   void readPropertiesByJson();
+
+  // get code of ball's color by one dimensional index
   const size_t& get(size_t index) const;
   size_t& get(size_t index);
+
+  // get random color code from the palette
   Color getRandomColor() const;
+
+  // emit to the view that the ball by the index
+  // was selected or deselected
   void emitDecoration(size_t index);
+
+  // compute how many points have to be added
+  // to the score after move
   void computeScore();
 
+  // try to move selected ball to the index
   bool move(const int);
 
+  // check is at least one move can be done
   bool areThereMoreMoves();
 
+  // recursively search for all identical balls that touch the index
   void findBallsToRemove(size_t index, size_t iter = 0) const;
+
+  // move away to the top all balls from indexes_to_remove
   void removeBallsGroup();
+
+  // use findBallsToRemove on the all field
   void findAllBallsGroup();
+
+  // move ball by the index away to the top
   void swapUp(size_t);
+
+  // checking if the swap between indexes will give
+  // a group of balls with more than 2 identical balls
   bool trySwap(size_t,size_t);
 
-  void waitForAnim() const;
-
 private:
-  std::vector<std::string> palette;
+  std::vector<std::string> palette; // set by properties
+
   bool model_setted = false;
-  size_t m_columns;
-  size_t m_rows;
+  size_t m_columns = 0;
+  size_t m_rows = 0;
   size_t m_score = 0;
   size_t m_steps = 0;
   size_t points_counter = 0;
   int selected_idx = -1;
 
-  mutable std::vector<std::vector<Color>> balls;
-  mutable std::unordered_set<size_t> indexes_to_remove;
+  std::vector<std::vector<Color>> balls;
+  std::unordered_set<size_t> indexes_to_remove;
 };
 #endif // BALLSFIELD_H
