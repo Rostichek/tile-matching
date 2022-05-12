@@ -271,6 +271,8 @@ bool BallsField::move(const int index) {
       m_steps++;
       emit stepsChanged();
       findAllBallsGroup();
+      emit endGame();
+
       return true;
     }
 }
@@ -303,5 +305,6 @@ bool BallsField::areThereMoreMoves() {
         }
     }
 
+  emit endGame();
   return false;
 }

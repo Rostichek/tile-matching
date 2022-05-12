@@ -13,6 +13,22 @@ Item {
 
         anchors.fill: parent
 
+        Popup {
+            id: popup
+            anchors.centerIn: parent
+            width: _window.width * 0.8
+            height: _window.height * 0.2
+            modal: true
+
+            Text {
+                anchors.centerIn: parent
+                text: "There are no more swaps\n\nYour result is " + balls_model.score
+                      + " points by " + balls_model.steps + " steps"
+            }
+
+            onClosed: balls_model.createBalls()
+        }
+
         GridView {
             id: balls
 
@@ -28,6 +44,7 @@ Item {
                 rows: Math.ceil(_window.height / balls.cellHeight) + 1
 
                 onRowsChanged: createBalls()
+                onEndGame: popup.open()
             }
 
             delegate: Ball {

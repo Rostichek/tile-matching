@@ -28,10 +28,12 @@ public:
   Q_PROPERTY(int rows MEMBER m_rows NOTIFY rowsChanged);
   Q_PROPERTY(int score MEMBER m_score NOTIFY scoreChanged);
   Q_PROPERTY(int steps MEMBER m_steps NOTIFY stepsChanged);
+
 Q_SIGNALS:
   void rowsChanged();
   void scoreChanged();
   void stepsChanged();
+  void endGame();
 
 private:
   const size_t& get(size_t index) const;
