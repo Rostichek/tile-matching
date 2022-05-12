@@ -13,6 +13,10 @@
 
 BallsField::BallsField(QObject *parent) : QAbstractListModel(parent)
 {
+  readPropertiesByJson();
+}
+
+void BallsField::readPropertiesByJson() {
   QFile properties_file;
 
   properties_file.setFileName("/home/rokoval/TileMatching/properties.json");
@@ -28,8 +32,6 @@ BallsField::BallsField(QObject *parent) : QAbstractListModel(parent)
   auto json_palette = properties_document.object()["palette"].toArray();
   for(const auto& color : json_palette)
     palette.emplace_back(color.toString().toStdString());
-
-  return;
 }
 
 BallsField::Color& BallsField::get(size_t index) {
@@ -271,7 +273,6 @@ bool BallsField::move(const int index) {
       m_steps++;
       emit stepsChanged();
       findAllBallsGroup();
-      emit endGame();
 
       return true;
     }

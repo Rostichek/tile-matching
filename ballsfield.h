@@ -36,6 +36,7 @@ Q_SIGNALS:
   void endGame();
 
 private:
+  void readPropertiesByJson();
   const size_t& get(size_t index) const;
   size_t& get(size_t index);
   Color getRandomColor() const;
