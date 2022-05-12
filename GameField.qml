@@ -24,6 +24,8 @@ Item {
             model: BallsModel {
                 id: balls_model
                 rows: Math.ceil(_window.height / balls.cellHeight) + 1
+
+                onRowsChanged: createBalls()
             }
 
             delegate: Ball {

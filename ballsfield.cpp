@@ -44,7 +44,7 @@ int BallsField::getScore() const {
 
 void BallsField::computeScore() {
   m_score += exp(indexes_to_remove.size()*0.35);
-  scoreChanged();
+  emit scoreChanged();
   indexes_to_remove.clear();
 }
 
@@ -56,16 +56,14 @@ int BallsField::rowCount(const QModelIndex &parent) const {
   if (parent.isValid())
     return 0;
 
-  return m_columns * m_rows;
+  return model_setted ? m_columns * m_rows : 0;
 }
 
 QVariant BallsField::data(const QModelIndex &index, int role) const
 {
-  if(balls.front().empty()) CreateBalls();
-
   switch(role) {
     case Qt::DisplayRole:
-      return get(index.row()).c_str();
+      return palette.at(get(index.row())).c_str();
 
     case Qt::DecorationRole:
       return index.row() == selected_idx;
@@ -78,18 +76,38 @@ QVariant BallsField::data(const QModelIndex &index, int role) const
 }
 
 BallsField::Color BallsField::getRandomColor() const {
-  std::random_device r;
-  std::default_random_engine e1(r());
+  std::random_device device;
+  std::mt19937 gen(device());
   std::uniform_int_distribution<int> uniform_dist(0, palette.size()-1);
-  return palette.at(uniform_dist(e1));
+  return uniform_dist(gen);
 }
 
-void BallsField::CreateBalls() const {
+void BallsField::createBalls() {
+  beginResetModel();
   for(auto& row : balls) {
       row.resize(m_rows);
       for(auto& ball : row)
         ball = getRandomColor();
     }
+
+  bool to_remove = false;
+  do {
+      for(size_t i = 0; i < m_rows * m_columns; i++) {
+          indexes_to_remove.clear();
+          findBallsToRemove(i);
+          if(indexes_to_remove.size() >= 3) {
+              get(*indexes_to_remove.begin()) = getRandomColor();
+              get(*indexes_to_remove.cbegin()) = getRandomColor();
+            }
+        }
+    } while (to_remove);
+
+  indexes_to_remove.clear();
+  model_setted = true;
+
+  endResetModel();
+
+  return;
 }
 
 void BallsField::selectBall(int index) {
@@ -113,7 +131,7 @@ void BallsField::selectBall(int index) {
     }
 }
 
-void BallsField::findBallsToRemove(size_t index, size_t iter) {
+void BallsField::findBallsToRemove(size_t index, size_t iter) const {
   static size_t basic_ball;
   if(!iter) basic_ball = index;
 

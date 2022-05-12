@@ -11,7 +11,7 @@ class BallsField : public QAbstractListModel
   Q_OBJECT
 
 public:
-  using Color = std::string;
+  using Color = size_t;
 
   explicit BallsField(QObject *parent = nullptr);
 
@@ -21,6 +21,8 @@ public:
 
   Q_INVOKABLE void selectBall(int index);
   Q_INVOKABLE int getScore() const;
+  Q_INVOKABLE void createBalls();
+
 
   Q_PROPERTY(int columns MEMBER m_columns CONSTANT);
   Q_PROPERTY(int rows MEMBER m_rows NOTIFY rowsChanged);
@@ -32,21 +34,21 @@ Q_SIGNALS:
   void stepsChanged();
 
 private:
-  const Color& get(size_t index) const;
-  Color& get(size_t index);
+  const size_t& get(size_t index) const;
+  size_t& get(size_t index);
   Color getRandomColor() const;
   void emitDecoration(size_t index);
   void computeScore();
 
-  void CreateBalls() const;
   bool move(const int);
 
-  void findBallsToRemove(size_t index, size_t iter = 0);
+  void findBallsToRemove(size_t index, size_t iter = 0) const;
   void removeBallsGroup();
   void swapUp(size_t);
 
 private:
-  std::vector<Color> palette;
+  std::vector<std::string> palette;
+  bool model_setted = false;
   size_t m_columns;
   size_t m_rows;
   size_t m_score = 0;
@@ -55,6 +57,6 @@ private:
   int selected_idx = -1;
 
   mutable std::vector<std::vector<Color>> balls;
-  std::unordered_set<size_t> indexes_to_remove;
+  mutable std::unordered_set<size_t> indexes_to_remove;
 };
 #endif // BALLSFIELD_H
