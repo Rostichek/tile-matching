@@ -20,19 +20,23 @@ public:
   QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
   Q_INVOKABLE void selectBall(int index);
+  Q_INVOKABLE int getScore() const;
 
   Q_PROPERTY(int columns MEMBER m_columns CONSTANT);
   Q_PROPERTY(int rows MEMBER m_rows NOTIFY rowsChanged);
-
+  Q_PROPERTY(int score MEMBER m_score NOTIFY scoreChanged);
+  Q_PROPERTY(int steps MEMBER m_steps NOTIFY stepsChanged);
 Q_SIGNALS:
-  void columnsChanged();
   void rowsChanged();
+  void scoreChanged();
+  void stepsChanged();
 
 private:
   const Color& get(size_t index) const;
   Color& get(size_t index);
   Color getRandomColor() const;
   void emitDecoration(size_t index);
+  void computeScore();
 
   void CreateBalls() const;
   bool move(const int);
@@ -45,7 +49,8 @@ private:
   std::vector<Color> palette;
   size_t m_columns;
   size_t m_rows;
-  size_t score = 0;
+  size_t m_score = 0;
+  size_t m_steps = 0;
   size_t points_counter = 0;
   int selected_idx = -1;
 

@@ -16,6 +16,13 @@ Item {
 
         color: display
 
+        Behavior on color {
+
+            ColorAnimation {
+                duration: 1000
+            }
+        }
+
         MouseArea {
             anchors.fill: circle
             hoverEnabled: true

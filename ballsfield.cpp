@@ -1,6 +1,7 @@
 #include "ballsfield.h"
 #include <random>
 #include <set>
+#include <cmath>
 #include <QDebug>
 #include <QFile>
 #include <QJsonDocument>
@@ -37,6 +38,16 @@ const BallsField::Color& BallsField::get(size_t index) const {
   return balls[index / m_rows][index % m_rows];
 }
 
+int BallsField::getScore() const {
+  return m_score;
+}
+
+void BallsField::computeScore() {
+  m_score += exp(indexes_to_remove.size()*0.35);
+  scoreChanged();
+  indexes_to_remove.clear();
+}
+
 void BallsField::emitDecoration(size_t index) {
   emit dataChanged(this->index(index), this->index(index), { Qt::DecorationRole });
 }
@@ -59,6 +70,8 @@ QVariant BallsField::data(const QModelIndex &index, int role) const
     case Qt::DecorationRole:
       return index.row() == selected_idx;
 
+    case Qt::StatusTipRole:
+      return static_cast<int>(m_score);
     default:
       return {};
     }
@@ -155,7 +168,7 @@ void BallsField::removeBallsGroup() {
         }
     }
 
-  indexes_to_remove.clear();
+  computeScore();
 }
 
 bool BallsField::move(const int index) {
@@ -206,7 +219,8 @@ bool BallsField::move(const int index) {
   else {
       selected_idx = -1;
       emitDecoration(index);
-
+      m_steps++;
+      stepsChanged();
       removeBallsGroup();
       return true;
 
