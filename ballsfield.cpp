@@ -130,8 +130,10 @@ void BallsField::selectBall(int index) {
       emitDecoration(index);
     }
   else {
-      if(move(index))
-        emit dataChanged(this->index(0), this->index(m_rows * m_columns - 1), { Qt::DisplayRole });
+      if(move(index)) {
+          emit dataChanged(this->index(0), this->index(m_rows * m_columns - 1), { Qt::DisplayRole });
+          areThereMoreMoves();
+        }
       else {
           size_t tmp = selected_idx;
           selected_idx = index;
@@ -214,38 +216,38 @@ void BallsField::findAllBallsGroup() {
   indexes_to_remove.clear();
 }
 
-bool BallsField::move(const int index) {
-  auto trySwap = [&]() {
-      std::swap(get(index), get(selected_idx));
+bool BallsField::trySwap(size_t first,size_t second) {
+  std::swap(get(first), get(second));
 
-      for(size_t ball_index : {index, selected_idx}) {
-          indexes_to_remove.clear();
-          findBallsToRemove(ball_index);
-          if(indexes_to_remove.size() >= 3) {
-              return true;
-            }
+  for(size_t ball_index : {first, second}) {
+      indexes_to_remove.clear();
+      findBallsToRemove(ball_index);
+      if(indexes_to_remove.size() >= 3) {
+          return true;
         }
+    }
 
-      std::swap(get(index), get(selected_idx));
-      return false;
-    };
+  std::swap(get(first), get(second));
+  return false;
+}
 
+bool BallsField::move(const int index) {
   int diff = selected_idx - index;
 
   if ((1 == diff) && ((index + 1) % m_columns)) {
-      if(!trySwap())
+      if(!trySwap(index, selected_idx))
         return false;
       beginMoveRows(QModelIndex(), index, index, QModelIndex(), selected_idx+1);
       endMoveRows();
     }
   else if (-1 == diff && (index % m_columns)) {
-      if(!trySwap())
+      if(!trySwap(index, selected_idx))
         return false;
       beginMoveRows(QModelIndex(), index, index, QModelIndex(), selected_idx);
       endMoveRows();
     }
   else if(-m_columns == diff) {
-      if(!trySwap())
+      if(!trySwap(index, selected_idx))
         return false;
       beginMoveRows(QModelIndex(), index, index, QModelIndex(), index - m_columns);
       endMoveRows();
@@ -253,7 +255,7 @@ bool BallsField::move(const int index) {
       endMoveRows();
     }
   else if (m_columns == diff) {
-      if(!trySwap())
+      if(!trySwap(index, selected_idx))
         return false;
       beginMoveRows(QModelIndex(), index, index, QModelIndex(), selected_idx + 1);
       endMoveRows();
@@ -271,4 +273,35 @@ bool BallsField::move(const int index) {
       findAllBallsGroup();
       return true;
     }
+}
+
+bool BallsField::areThereMoreMoves() {
+  // check  all horizontal swaps
+  for(size_t i = 0; i < m_rows; i++) {
+      //    If there is an odd number of elements,
+      //    then at the last transition we need to change the step to 1
+      for(size_t j = 0; j < m_columns - 1; j += (m_columns - j == 3) ? 1 : 2) {
+          size_t first = i * m_columns + j,
+              second = i * m_columns + j + 1;
+          if(trySwap(first, second)) {
+              std::swap(get(first), get(second));
+              return true;
+            }
+        }
+    }
+  // check all vertical swaps
+  for(size_t i = 0; i < m_columns; i++) {
+      //    If there is an odd number of elements,
+      //    then at the last transition we need to change the step to 1
+      for(size_t j = 0; j < m_rows - 1; (m_rows - j == 3) ? 1 : 2) {
+          size_t first = j * m_columns + i,
+              second = (j + 1) * m_columns + i;
+          if(trySwap(first, second)) {
+              std::swap(get(first), get(second));
+              return true;
+            }
+        }
+    }
+
+  return false;
 }

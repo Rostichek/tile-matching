@@ -42,10 +42,13 @@ private:
 
   bool move(const int);
 
+  bool areThereMoreMoves();
+
   void findBallsToRemove(size_t index, size_t iter = 0) const;
   void removeBallsGroup();
   void findAllBallsGroup();
   void swapUp(size_t);
+  bool trySwap(size_t,size_t);
 
   void waitForAnim() const;
 
