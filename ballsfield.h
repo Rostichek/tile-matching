@@ -44,6 +44,7 @@ private:
 
   void findBallsToRemove(size_t index, size_t iter = 0) const;
   void removeBallsGroup();
+  void findAllBallsGroup();
   void swapUp(size_t);
 
 private:

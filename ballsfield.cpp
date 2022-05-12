@@ -189,6 +189,21 @@ void BallsField::removeBallsGroup() {
   computeScore();
 }
 
+void BallsField::findAllBallsGroup() {
+  bool to_remove = false;
+  do {
+      for(size_t i = 0; i < m_rows * m_columns; i++) {
+          indexes_to_remove.clear();
+          findBallsToRemove(i);
+          if(indexes_to_remove.size() >= 3) {
+              removeBallsGroup();
+              i = 0;
+            }
+        }
+    } while (to_remove);
+  indexes_to_remove.clear();
+}
+
 bool BallsField::move(const int index) {
   auto trySwap = [&]() {
       std::swap(get(index), get(selected_idx));
@@ -238,9 +253,8 @@ bool BallsField::move(const int index) {
       selected_idx = -1;
       emitDecoration(index);
       m_steps++;
-      stepsChanged();
-      removeBallsGroup();
+      emit stepsChanged();
+      findAllBallsGroup();
       return true;
-
     }
 }
