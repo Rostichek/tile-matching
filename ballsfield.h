@@ -47,6 +47,8 @@ private:
   void findAllBallsGroup();
   void swapUp(size_t);
 
+  void waitForAnim() const;
+
 private:
   std::vector<std::string> palette;
   bool model_setted = false;

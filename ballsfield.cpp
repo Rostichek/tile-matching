@@ -8,6 +8,8 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <exception>
+#include <thread>
+#include <chrono>
 
 BallsField::BallsField(QObject *parent) : QAbstractListModel(parent)
 {
@@ -46,6 +48,10 @@ void BallsField::computeScore() {
   m_score += exp(indexes_to_remove.size()*0.35);
   emit scoreChanged();
   indexes_to_remove.clear();
+}
+
+void BallsField::waitForAnim() const {
+  std::this_thread::sleep_for(std::chrono::milliseconds(500));
 }
 
 void BallsField::emitDecoration(size_t index) {
@@ -211,13 +217,17 @@ void BallsField::findAllBallsGroup() {
 bool BallsField::move(const int index) {
   auto trySwap = [&]() {
       std::swap(get(index), get(selected_idx));
-      findBallsToRemove(index);
-      if(indexes_to_remove.size() < 3) {
-          std::swap(get(index), get(selected_idx));
+
+      for(size_t ball_index : {index, selected_idx}) {
           indexes_to_remove.clear();
-          return false;
+          findBallsToRemove(ball_index);
+          if(indexes_to_remove.size() >= 3) {
+              return true;
+            }
         }
-      return true;
+
+      std::swap(get(index), get(selected_idx));
+      return false;
     };
 
   int diff = selected_idx - index;
