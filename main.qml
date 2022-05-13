@@ -4,12 +4,15 @@ import QtQuick.Window 2.12
 Window {
     id: _window
 
-    width: 350
-    height: 480
+    minimumWidth: 350
+    minimumHeight: _view.expectedScreenSize
     visible: true
-    title: qsTr("Hello World")
+
+    maximumHeight: minimumHeight
+    maximumWidth: minimumWidth
 
     GameField {
+        id: _view
         anchors.fill: parent
     }
 }

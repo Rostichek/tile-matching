@@ -1,5 +1,6 @@
 {
-    "columns": 7,
+    "columns": 4,
+    "rows": 6,
     "palette": [
         "lightblue",
         "green",
@@ -7,8 +8,6 @@
         "yellow",
         "lightyellow",
         "pink",
-        "cyan",
-        "brown",
-        "orange"
+        "cyan"
     ]
 }

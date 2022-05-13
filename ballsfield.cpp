@@ -14,6 +14,7 @@
 BallsField::BallsField(QObject *parent) : QAbstractListModel(parent)
 {
   readPropertiesByJson();
+  createBalls();
 }
 
 void BallsField::readPropertiesByJson() {
@@ -27,6 +28,7 @@ void BallsField::readPropertiesByJson() {
   QJsonDocument properties_document;
   properties_document = QJsonDocument::fromJson(data);
   m_columns = properties_document.object()["columns"].toInt();
+  m_rows = properties_document.object()["rows"].toInt() + 1; // lsa row upper than screen
   balls.resize(m_columns);
 
   auto json_palette = properties_document.object()["palette"].toArray();
@@ -119,15 +121,15 @@ void BallsField::createBalls() {
 }
 
 void BallsField::selectBall(int index) {
-  if(-1 == selected_idx) {
+  if(-1 == selected_idx) { // no one ball is selected
       selected_idx = index;
       emitDecoration(index);
     }
-  else if(index == selected_idx){
+  else if(index == selected_idx){ // this ball is selected
       selected_idx = -1;
       emitDecoration(index);
     }
-  else {
+  else { // to select new ball
       if(move(index)) {
           emit dataChanged(this->index(0), this->index(m_rows * m_columns - 1), { Qt::DisplayRole });
           areThereMoreMoves();
@@ -159,12 +161,12 @@ void BallsField::findBallsToRemove(size_t index, size_t iter) const {
       if(get(second_ball) == get(basic_ball) && !indexes_to_remove.count(second_ball))
         findBallsToRemove(second_ball, iter + 1);
     }
-  if(index > m_columns) { // down
+  if(index >= m_columns) { // down
       second_ball = index - m_columns;
       if(get(second_ball) == get(basic_ball) && !indexes_to_remove.count(second_ball))
         findBallsToRemove(second_ball, iter + 1);
     }
-  if(index < m_columns * (m_rows - 1)) { // up
+  if(index < m_columns * (m_rows - 2)) { // up
       second_ball = index + m_columns;
       if(get(second_ball) == get(basic_ball) && !indexes_to_remove.count(second_ball))
         findBallsToRemove(second_ball, iter + 1);
@@ -202,7 +204,7 @@ void BallsField::removeBallsGroup() {
 void BallsField::findAllBallsGroup() {
   bool to_remove = false;
   do {
-      for(size_t i = 0; i < m_rows * m_columns; i++) {
+      for(size_t i = 0; i < (m_rows - 1) * m_columns; i++) {
           indexes_to_remove.clear();
           findBallsToRemove(i);
           if(indexes_to_remove.size() >= 3) {
@@ -232,6 +234,7 @@ bool BallsField::trySwap(size_t first,size_t second) {
 bool BallsField::move(const int index) {
   int diff = selected_idx - index;
 
+  indexes_to_remove.clear();
   if ((1 == diff) && ((index + 1) % m_columns)) {
       if(!trySwap(index, selected_idx))
         return false;
@@ -276,14 +279,15 @@ bool BallsField::move(const int index) {
 
 bool BallsField::areThereMoreMoves() {
   // check  all horizontal swaps
-  for(size_t i = 0; i < m_rows; i++) {
+  for(size_t i = 0; i < m_rows - 1; i++) {
       //    If there is an odd number of elements,
       //    then at the last transition we need to change the step to 1
-      for(size_t j = 0; j < m_columns - 1; j += (m_columns - j == 3) ? 1 : 2) {
+      for(size_t j = 0; j < m_columns - 1; j++) {
           size_t first = i * m_columns + j,
               second = i * m_columns + j + 1;
           if(trySwap(first, second)) {
               std::swap(get(first), get(second));
+              qDebug() << "Possible swap: " << first << " <-> " << second;
               return true;
             }
         }
@@ -292,16 +296,18 @@ bool BallsField::areThereMoreMoves() {
   for(size_t i = 0; i < m_columns; i++) {
       //    If there is an odd number of elements,
       //    then at the last transition we need to change the step to 1
-      for(size_t j = 0; j < m_rows - 1; (m_rows - j == 3) ? 1 : 2) {
+      for(size_t j = 0; j < m_rows - 2; j++) {
           size_t first = j * m_columns + i,
               second = (j + 1) * m_columns + i;
           if(trySwap(first, second)) {
               std::swap(get(first), get(second));
+              qDebug() << "Possible swap: " << first << " <-> " << second;
               return true;
             }
         }
     }
 
   emit endGame();
+  qDebug() << "There are no one possible swaps";
   return false;
 }
