@@ -152,13 +152,13 @@ void BallsField::findBallsToRemove(size_t index, size_t iter) const {
   };
 
   if(index && (index % m_columns)) // right
-      moveOn(index - 1);
+    moveOn(index - 1);
   if(index + 1 != balls.size() && (index + 1) % m_columns) // left
-      moveOn(index + 1);
+    moveOn(index + 1);
   if(index >= m_columns)  // down
-      moveOn(index - m_columns);
+    moveOn(index - m_columns);
   if(index < m_columns * (m_rows - 2))  // up
-      moveOn(index + m_columns);
+    moveOn(index + m_columns);
 
   return;
 }
@@ -215,37 +215,41 @@ bool BallsField::trySwap(size_t first,size_t second) {
 }
 
 void BallsField::moveRows(int first_lhs, int first_rhs, int second_lhs, int scond_rhs) {
-    beginMoveRows(QModelIndex(), first_lhs, first_lhs, QModelIndex(), first_rhs);
-    endMoveRows();
-    if(-1 == second_lhs)
-      return;
-    beginMoveRows(QModelIndex(), second_lhs, second_lhs, QModelIndex(), scond_rhs);
-    endMoveRows();
-  };
+  beginMoveRows(QModelIndex(), first_lhs, first_lhs, QModelIndex(), first_rhs);
+  endMoveRows();
+  if(-1 == second_lhs)
+    return;
+  beginMoveRows(QModelIndex(), second_lhs, second_lhs, QModelIndex(), scond_rhs);
+  endMoveRows();
+};
 
 bool BallsField::move(const int index) {
   int diff = selected_idx - index;
 
   indexes_to_remove.clear();
-  if ((1 == diff) && ((index + 1) % m_columns)) {
+
+  auto trySwapAndMove = [&](int first_lhs, int first_rhs, int second_lhs = -1, int second_rhs = - 1) {
       if(!trySwap(index, selected_idx))
         return false;
-      moveRows(index, selected_idx + 1);
+      moveRows(first_lhs, first_rhs, second_lhs, second_rhs);
+      return true;
+    };
+
+  if ((1 == diff) && ((index + 1) % m_columns)) {
+      if(!trySwapAndMove(index, selected_idx + 1))
+        return false;
     }
   else if (-1 == diff && (index % m_columns)) {
-      if(!trySwap(index, selected_idx))
+      if(!trySwapAndMove(index, selected_idx))
         return false;
-      moveRows(index, selected_idx);
     }
   else if (m_columns == diff) {
-      if(!trySwap(index, selected_idx))
+      if(!trySwapAndMove(index, selected_idx + 1, selected_idx - 1, index))
         return false;
-      moveRows(index, selected_idx + 1, selected_idx - 1, index);
     }
   else if(-m_columns == diff) {
-      if(!trySwap(index, selected_idx))
+      if(!trySwapAndMove(index, selected_idx, selected_idx + 1, index + 1))
         return false;
-      moveRows(index, selected_idx, selected_idx + 1, index + 1);
     }
 
   if(indexes_to_remove.empty())
