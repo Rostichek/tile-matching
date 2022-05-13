@@ -8,8 +8,6 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <exception>
-#include <thread>
-#include <chrono>
 
 BallsField::BallsField(QObject *parent) : QAbstractListModel(parent)
 {
@@ -20,9 +18,9 @@ BallsField::BallsField(QObject *parent) : QAbstractListModel(parent)
 void BallsField::readPropertiesByJson() {
   QFile properties_file;
 
-  properties_file.setFileName("/home/rokoval/TileMatching/properties.json");
+  properties_file.setFileName("../TileMatching/properties.json");
   if(!properties_file.open(QIODevice::ReadOnly))
-    throw std::runtime_error("propertoe.json doesn't exist");
+    throw std::runtime_error("properties.json doesn't exist");
 
   QByteArray data = properties_file.readAll();
   QJsonDocument properties_document;
@@ -176,10 +174,7 @@ void BallsField::findBallsToRemove(size_t index, size_t iter) const {
 
 void BallsField::swapUp(size_t index) {
   size_t second_ball = index + m_columns;
-  beginMoveRows(QModelIndex(), index, index, QModelIndex(), second_ball + 1);
-  endMoveRows();
-  beginMoveRows(QModelIndex(), second_ball- 1, second_ball - 1, QModelIndex(), index);
-  endMoveRows();
+  moveRows(index, second_ball + 1, second_ball - 1, index);
   std::swap(get(index), get(second_ball));
 }
 
@@ -201,17 +196,15 @@ void BallsField::removeBallsGroup() {
 }
 
 void BallsField::findAllBallsGroup() {
-  bool to_remove = false;
-  do {
-      for(size_t i = 0; i < (m_rows - 1) * m_columns; i++) {
-          indexes_to_remove.clear();
-          findBallsToRemove(i);
-          if(indexes_to_remove.size() >= 3) {
-              removeBallsGroup();
-              i = 0;
-            }
+  for(size_t i = 0; i < (m_rows - 1) * m_columns; i++) {
+      indexes_to_remove.clear();
+      findBallsToRemove(i);
+      if(indexes_to_remove.size() >= 3) {
+          removeBallsGroup();
+          i = 0;
         }
-    } while (to_remove);
+    }
+
   indexes_to_remove.clear();
 }
 
@@ -230,6 +223,16 @@ bool BallsField::trySwap(size_t first,size_t second) {
   return false;
 }
 
+// emit swaps to the qml-side
+void BallsField::moveRows(int first_lhs, int first_rhs, int second_lhs, int scond_rhs) {
+    beginMoveRows(QModelIndex(), first_lhs, first_lhs, QModelIndex(), first_rhs);
+    endMoveRows();
+    if(-1 == second_lhs)
+      return;
+    beginMoveRows(QModelIndex(), second_lhs, second_lhs, QModelIndex(), scond_rhs);
+    endMoveRows();
+  };
+
 bool BallsField::move(const int index) {
   int diff = selected_idx - index;
 
@@ -237,30 +240,22 @@ bool BallsField::move(const int index) {
   if ((1 == diff) && ((index + 1) % m_columns)) {
       if(!trySwap(index, selected_idx))
         return false;
-      beginMoveRows(QModelIndex(), index, index, QModelIndex(), selected_idx+1);
-      endMoveRows();
+      moveRows(index, selected_idx + 1);
     }
   else if (-1 == diff && (index % m_columns)) {
       if(!trySwap(index, selected_idx))
         return false;
-      beginMoveRows(QModelIndex(), index, index, QModelIndex(), selected_idx);
-      endMoveRows();
-    }
-  else if(-m_columns == diff) {
-      if(!trySwap(index, selected_idx))
-        return false;
-      beginMoveRows(QModelIndex(), index, index, QModelIndex(), index - m_columns);
-      endMoveRows();
-      beginMoveRows(QModelIndex(), selected_idx + 1, selected_idx + 1, QModelIndex(), index + 1);
-      endMoveRows();
+      moveRows(index, selected_idx);
     }
   else if (m_columns == diff) {
       if(!trySwap(index, selected_idx))
         return false;
-      beginMoveRows(QModelIndex(), index, index, QModelIndex(), selected_idx + 1);
-      endMoveRows();
-      beginMoveRows(QModelIndex(), selected_idx - 1, selected_idx - 1, QModelIndex(), index);
-      endMoveRows();
+      moveRows(index, selected_idx + 1, selected_idx - 1, index);
+    }
+  else if(-m_columns == diff) {
+      if(!trySwap(index, selected_idx))
+        return false;
+      moveRows(index, selected_idx, selected_idx + 1, index + 1);
     }
 
   if(indexes_to_remove.empty())

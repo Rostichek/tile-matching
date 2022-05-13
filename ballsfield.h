@@ -74,6 +74,9 @@ private:
   // a group of balls with more than 2 identical balls
   bool trySwap(size_t,size_t);
 
+  // emit swaps to the qml-side
+  void moveRows(int first_lhs, int first_rhs, int second_lhs = -1, int scond_rhs = -1);
+
 private:
   std::vector<std::string> palette; // set by properties
 
