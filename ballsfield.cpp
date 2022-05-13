@@ -96,17 +96,16 @@ void BallsField::createBalls() {
         ball = getRandomColor();
     }
 
-  bool to_remove = false;
-  do {
-      for(size_t i = 0; i < m_rows * m_columns; i++) {
-          indexes_to_remove.clear();
-          findBallsToRemove(i);
-          if(indexes_to_remove.size() >= 3) {
-              get(*indexes_to_remove.begin()) = getRandomColor();
-              get(*indexes_to_remove.cbegin()) = getRandomColor();
-            }
+
+  for(size_t i = 0; i < m_rows * m_columns; i++) {
+      indexes_to_remove.clear();
+      findBallsToRemove(i);
+      if(indexes_to_remove.size() >= 3) {
+          get(*indexes_to_remove.begin()) = getRandomColor();
+          get(*indexes_to_remove.cbegin()) = getRandomColor();
+          i--;
         }
-    } while (to_remove);
+    }
 
   indexes_to_remove.clear();
   model_setted = true;
