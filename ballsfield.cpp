@@ -1,6 +1,7 @@
 #include "ballsfield.h"
 #include <random>
 #include <set>
+#include <utility>
 #include <cmath>
 #include <QDebug>
 #include <QFile>
@@ -60,7 +61,7 @@ int BallsField::rowCount(const QModelIndex &parent) const {
   if (parent.isValid())
     return 0;
 
-  return model_setted ? m_columns * m_rows : 0;
+  return m_columns * m_rows;
 }
 
 QVariant BallsField::data(const QModelIndex &index, int role) const
@@ -74,6 +75,7 @@ QVariant BallsField::data(const QModelIndex &index, int role) const
 
     case Qt::StatusTipRole:
       return static_cast<int>(m_score);
+
     default:
       return {};
     }
@@ -82,7 +84,7 @@ QVariant BallsField::data(const QModelIndex &index, int role) const
 BallsField::Color BallsField::getRandomColor() const {
   std::random_device device;
   std::mt19937 gen(device());
-  std::uniform_int_distribution<int> uniform_dist(0, palette.size()-1);
+  std::uniform_int_distribution<int> uniform_dist(0, palette.size() - 1);
   return uniform_dist(gen);
 }
 
@@ -106,7 +108,6 @@ void BallsField::createBalls() {
     }
 
   indexes_to_remove.clear();
-  model_setted = true;
   endResetModel();
 
   m_score = 0;
@@ -223,7 +224,6 @@ bool BallsField::trySwap(size_t first,size_t second) {
   return false;
 }
 
-// emit swaps to the qml-side
 void BallsField::moveRows(int first_lhs, int first_rhs, int second_lhs, int scond_rhs) {
     beginMoveRows(QModelIndex(), first_lhs, first_lhs, QModelIndex(), first_rhs);
     endMoveRows();
@@ -272,32 +272,29 @@ bool BallsField::move(const int index) {
 }
 
 bool BallsField::areThereMoreMoves() {
+  auto areThisMoveSucesfull = [&](const std::pair<size_t, size_t>& adjacent_balls) {
+      if(trySwap(adjacent_balls.first, adjacent_balls.second)) {
+          std::swap(get(adjacent_balls.first), get(adjacent_balls.second));
+          qDebug() << "Possible swap: " << adjacent_balls.first << " <-> " << adjacent_balls.second;
+          return true;
+        }
+      return false;
+    };
+
   // check  all horizontal swaps
   for(size_t i = 0; i < m_rows - 1; i++) {
-      //    If there is an odd number of elements,
-      //    then at the last transition we need to change the step to 1
       for(size_t j = 0; j < m_columns - 1; j++) {
-          size_t first = i * m_columns + j,
-              second = i * m_columns + j + 1;
-          if(trySwap(first, second)) {
-              std::swap(get(first), get(second));
-              qDebug() << "Possible swap: " << first << " <-> " << second;
-              return true;
-            }
+          // { [j][i], [j + 1][i] }
+          if(areThisMoveSucesfull({i * m_columns + j, i * m_columns + j + 1}))
+            return true;
         }
     }
   // check all vertical swaps
   for(size_t i = 0; i < m_columns; i++) {
-      //    If there is an odd number of elements,
-      //    then at the last transition we need to change the step to 1
       for(size_t j = 0; j < m_rows - 2; j++) {
-          size_t first = j * m_columns + i,
-              second = (j + 1) * m_columns + i;
-          if(trySwap(first, second)) {
-              std::swap(get(first), get(second));
-              qDebug() << "Possible swap: " << first << " <-> " << second;
-              return true;
-            }
+          // { [i][j], [i][j + 1] }
+          if(areThisMoveSucesfull({j * m_columns + i, (j + 1) * m_columns + i}))
+            return true;
         }
     }
 
