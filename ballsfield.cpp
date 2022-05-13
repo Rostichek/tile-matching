@@ -142,33 +142,23 @@ void BallsField::selectBall(int index) {
 }
 
 void BallsField::findBallsToRemove(size_t index, size_t iter) const {
-  static size_t basic_ball;
-  if(!iter) basic_ball = index;
-
+  static size_t basic;
+  if(!iter) basic = index;
   indexes_to_remove.insert(index);
 
-  size_t second_ball = 0;
+  auto moveOn = [&](size_t second) {
+    if(get(second) == get(basic) && !indexes_to_remove.count(second))
+      findBallsToRemove(second, iter + 1);
+  };
 
-  if(index && (index % m_columns)) { // right
-      second_ball = index - 1;
-      if(get(second_ball) == get(basic_ball) && !indexes_to_remove.count(second_ball))
-        findBallsToRemove(second_ball, iter + 1);
-    }
-  if(index + 1 != balls.size() && (index + 1) % m_columns) { // left
-      second_ball = index + 1;
-      if(get(second_ball) == get(basic_ball) && !indexes_to_remove.count(second_ball))
-        findBallsToRemove(second_ball, iter + 1);
-    }
-  if(index >= m_columns) { // down
-      second_ball = index - m_columns;
-      if(get(second_ball) == get(basic_ball) && !indexes_to_remove.count(second_ball))
-        findBallsToRemove(second_ball, iter + 1);
-    }
-  if(index < m_columns * (m_rows - 2)) { // up
-      second_ball = index + m_columns;
-      if(get(second_ball) == get(basic_ball) && !indexes_to_remove.count(second_ball))
-        findBallsToRemove(second_ball, iter + 1);
-    }
+  if(index && (index % m_columns)) // right
+      moveOn(index - 1);
+  if(index + 1 != balls.size() && (index + 1) % m_columns) // left
+      moveOn(index + 1);
+  if(index >= m_columns)  // down
+      moveOn(index - m_columns);
+  if(index < m_columns * (m_rows - 2))  // up
+      moveOn(index + m_columns);
 
   return;
 }
@@ -197,7 +187,7 @@ void BallsField::removeBallsGroup() {
 }
 
 void BallsField::findAllBallsGroup() {
-  for(size_t i = 0; i < (m_rows - 1) * m_columns; i++) {
+  for(size_t i = 0; i < (m_rows - 1) * m_columns /* without unvisiable row */; i++) {
       indexes_to_remove.clear();
       findBallsToRemove(i);
       if(indexes_to_remove.size() >= 3) {
