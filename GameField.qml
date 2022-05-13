@@ -6,7 +6,7 @@ import QtQuick.Layouts 1.12
 Item {
     id: root
 
-    property int animDuration: 500
+    property int animDuration: 300
 
     Item {
         rotation: 180
@@ -28,6 +28,8 @@ Item {
                 id: _balls_model
                 rows: Math.ceil(_window.height / _balls.cellHeight) + 1
 
+                // the game will restart if you're trying to watch
+                // upper than game field border
                 onRowsChanged: createBalls()
                 onEndGame: popup.open()
             }

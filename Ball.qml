@@ -27,7 +27,8 @@ Item {
         Behavior on color {
 
             ColorAnimation {
-                duration: 1000
+                easing.type: Easing.InExpo
+                duration: animDuration - 100
             }
         }
     }

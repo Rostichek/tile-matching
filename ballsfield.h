@@ -86,6 +86,6 @@ private:
   int selected_idx = -1;
 
   std::vector<std::vector<Color>> balls;
-  std::unordered_set<size_t> indexes_to_remove;
+  mutable std::unordered_set<size_t> indexes_to_remove;
 };
 #endif // BALLSFIELD_H

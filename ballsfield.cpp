@@ -52,10 +52,6 @@ void BallsField::computeScore() {
   indexes_to_remove.clear();
 }
 
-void BallsField::waitForAnim() const {
-  std::this_thread::sleep_for(std::chrono::milliseconds(500));
-}
-
 void BallsField::emitDecoration(size_t index) {
   emit dataChanged(this->index(index), this->index(index), { Qt::DecorationRole });
 }
