@@ -35,6 +35,10 @@ void BallsField::readPropertiesByJson() {
     palette.emplace_back(color.toString().toStdString());
 }
 
+QHash<int,QByteArray> BallsField::roleNames() const {
+  return rolesDictionary;
+}
+
 BallsField::Color& BallsField::get(size_t index) {
   return balls[index / m_rows][index % m_rows];
 }
@@ -73,8 +77,11 @@ QVariant BallsField::data(const QModelIndex &index, int role) const
     case Qt::DecorationRole:
       return index.row() == selected_idx;
 
-    case Qt::StatusTipRole:
-      return static_cast<int>(m_score);
+    case HiddenRole: {
+        bool return_value = static_cast<bool>(to_hide.count(index.row()));
+        if(return_value) to_hide.erase(index.row());
+        return return_value;
+      }
 
     default:
       return {};
@@ -130,7 +137,6 @@ void BallsField::selectBall(int index) {
   else { // to select new ball
       if(move(index)) {
           emit dataChanged(this->index(0), this->index(m_rows * m_columns - 1), { Qt::DisplayRole });
-          areThereMoreMoves();
         }
       else {
           size_t tmp = selected_idx;
@@ -186,17 +192,23 @@ void BallsField::removeBallsGroup() {
   computeScore();
 }
 
-void BallsField::findAllBallsGroup() {
+bool BallsField::findAllBallsGroup() {
+  bool group_found = false;
+
   for(size_t i = 0; i < (m_rows / 2) * m_columns /* without unvisiable row */; i++) {
       indexes_to_remove.clear();
       findBallsToRemove(i);
       if(indexes_to_remove.size() >= 3) {
+          to_hide.insert(indexes_to_remove.begin(), indexes_to_remove.end());
+          emit dataChanged(this->index(0), this->index(m_rows * m_columns - 1), { HiddenRole });
           removeBallsGroup();
-          i = 0;
+          group_found = true;
         }
     }
 
   indexes_to_remove.clear();
+
+  return group_found;
 }
 
 bool BallsField::trySwap(size_t first,size_t second) {
@@ -259,8 +271,6 @@ bool BallsField::move(const int index) {
       emitDecoration(index);
       m_steps++;
       emit stepsChanged();
-      findAllBallsGroup();
-
       return true;
     }
 }

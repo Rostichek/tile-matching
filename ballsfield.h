@@ -9,6 +9,11 @@
 class BallsField : public QAbstractListModel
 {
   Q_OBJECT
+  Q_ENUMS(Roles)
+public:
+    enum Roles {
+        HiddenRole = Qt::UserRole + 1,
+    };
 
 public:
   using Color = size_t;
@@ -19,9 +24,17 @@ public:
 
   QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
+  QHash<int,QByteArray> roleNames() const override;
+
   Q_INVOKABLE void selectBall(int index);
   Q_INVOKABLE int getScore() const;
   Q_INVOKABLE void createBalls();
+
+  // use findBallsToRemove on the all field
+  Q_INVOKABLE bool findAllBallsGroup();
+
+  // check is at least one move can be done
+  Q_INVOKABLE bool areThereMoreMoves();
 
   Q_PROPERTY(int columns MEMBER m_columns CONSTANT); // set by properties
   Q_PROPERTY(int rows MEMBER m_rows NOTIFY rowsChanged); // computing by screen height and columns number
@@ -55,17 +68,11 @@ private:
   // try to move selected ball to the index
   bool move(const int);
 
-  // check is at least one move can be done
-  bool areThereMoreMoves();
-
   // recursively search for all identical balls that touch the index
   void findBallsToRemove(size_t index, size_t iter = 0) const;
 
   // move away to the top all balls from indexes_to_remove
   void removeBallsGroup();
-
-  // use findBallsToRemove on the all field
-  void findAllBallsGroup();
 
   // move ball by the index away to the top
   void swapUp(size_t);
@@ -89,5 +96,12 @@ private:
 
   std::vector<std::vector<Color>> balls;
   mutable std::unordered_set<size_t> indexes_to_remove;
+  mutable std::unordered_set<size_t> to_hide;
+
+  const QHash<int,QByteArray> rolesDictionary = {
+      { Qt::DisplayRole, "display" },
+      { Qt::DecorationRole, "decoration" },
+      { HiddenRole, "hidden" },
+  };
 };
 #endif // BALLSFIELD_H

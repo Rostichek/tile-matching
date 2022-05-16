@@ -7,7 +7,7 @@ Item {
     id: root
 
     property int expectedScreenSize: _balls.cellHeight * (_balls_model.rows / 2 + 0.5)
-    property int animDuration: 300
+    property int animDuration: 1000
 
     Rectangle {
         rotation: 180
@@ -21,6 +21,8 @@ Item {
         GridView {
             id: _balls
 
+            property bool is_all_groups_found: false
+
             interactive: false
             anchors.fill: parent
             cellHeight: _window.width / _balls_model.columns
@@ -28,10 +30,6 @@ Item {
 
             model: BallsModel {
                 id: _balls_model
-                // rows: Math.ceil(_window.height / _balls.cellHeight) + 1
-                // the game will restart if you're trying to watch
-                // upper than game field border
-                // onRowsChanged: createBalls()
                 onEndGame: popup.open()
             }
 
@@ -49,14 +47,36 @@ Item {
             }
 
             move: _ballsTransition
-        }
 
-        Transition {
-            id: _ballsTransition
+            transitions: Transition {
+                id: _ballsTransition
 
-            NumberAnimation {
-                properties: "x, y"
-                duration: animDuration
+                SequentialAnimation {
+
+                    NumberAnimation {
+                        duration: animDuration / 2
+                    }
+
+                    NumberAnimation {
+                        properties: "x, y"
+                        duration: animDuration / 3
+                    }
+                }
+
+                onRunningChanged: {
+                    if (running) {
+                        _balls.is_all_groups_found = false
+                        return
+                    }
+
+                    if (_balls.is_all_groups_found) {
+                        if (!_balls_model.areThereMoreMoves())
+                            _balls_model.endGame()
+                        return
+                    }
+
+                    _balls.is_all_groups_found = !_balls_model.findAllBallsGroup()
+                }
             }
         }
     }

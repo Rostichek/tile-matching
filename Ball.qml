@@ -6,6 +6,8 @@ Item {
 
     signal select
 
+    opacity: !hidden
+
     Rectangle {
         id: _circle
 
@@ -20,15 +22,35 @@ Item {
             anchors.fill: _circle
             hoverEnabled: true
             onClicked: select()
-            onExited: root.opacity = 1
-            onEntered: root.opacity = 0.5
+            //            onExited: root.opacity = 1
+            //            onEntered: root.opacity = 0.5
         }
 
         Behavior on color {
+            SequentialAnimation {
+                NumberAnimation {
+                    duration: animDuration / 2
+                }
+            }
+        }
+    }
 
-            ColorAnimation {
-                easing.type: Easing.InExpo
-                duration: animDuration - 100
+    Behavior on opacity {
+
+        SequentialAnimation {
+            onStopped: {
+                opacity = 1
+            }
+
+            NumberAnimation {
+                property: "opacity"
+                from: 1
+                to: 0
+                duration: animDuration / 2
+            }
+
+            NumberAnimation {
+                duration: animDuration / 2
             }
         }
     }
