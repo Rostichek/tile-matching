@@ -6,7 +6,7 @@ import QtQuick.Layouts 1.12
 Item {
     id: root
 
-    property int expectedScreenSize: _balls.cellHeight * (_balls_model.rows - 0.5)
+    property int expectedScreenSize: _balls.cellHeight * (_balls_model.rows / 2 + 0.5)
     property int animDuration: 300
 
     Rectangle {

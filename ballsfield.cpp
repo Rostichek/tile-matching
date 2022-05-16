@@ -27,7 +27,7 @@ void BallsField::readPropertiesByJson() {
   QJsonDocument properties_document;
   properties_document = QJsonDocument::fromJson(data);
   m_columns = properties_document.object()["columns"].toInt();
-  m_rows = properties_document.object()["rows"].toInt() + 1; // lsa row upper than screen
+  m_rows = properties_document.object()["rows"].toInt() * 2; // lsa row upper than screen
   balls.resize(m_columns);
 
   auto json_palette = properties_document.object()["palette"].toArray();
@@ -157,7 +157,7 @@ void BallsField::findBallsToRemove(size_t index, size_t iter) const {
     moveOn(index + 1);
   if(index >= m_columns)  // down
     moveOn(index - m_columns);
-  if(index < m_columns * (m_rows - 2))  // up
+  if(index < m_columns * (m_rows / 2 - 1))  // up
     moveOn(index + m_columns);
 
   return;
@@ -187,7 +187,7 @@ void BallsField::removeBallsGroup() {
 }
 
 void BallsField::findAllBallsGroup() {
-  for(size_t i = 0; i < (m_rows - 1) * m_columns /* without unvisiable row */; i++) {
+  for(size_t i = 0; i < (m_rows / 2) * m_columns /* without unvisiable row */; i++) {
       indexes_to_remove.clear();
       findBallsToRemove(i);
       if(indexes_to_remove.size() >= 3) {
@@ -276,7 +276,7 @@ bool BallsField::areThereMoreMoves() {
     };
 
   // check  all horizontal swaps
-  for(size_t i = 0; i < m_rows - 1; i++) {
+  for(size_t i = 0; i < m_rows / 2; i++) {
       for(size_t j = 0; j < m_columns - 1; j++) {
           // { [j][i], [j + 1][i] }
           if(areThisMoveSucesfull({i * m_columns + j, i * m_columns + j + 1}))
@@ -285,7 +285,7 @@ bool BallsField::areThereMoreMoves() {
     }
   // check all vertical swaps
   for(size_t i = 0; i < m_columns; i++) {
-      for(size_t j = 0; j < m_rows - 2; j++) {
+      for(size_t j = 0; j < m_rows / 2 - 1; j++) {
           // { [i][j], [i][j + 1] }
           if(areThisMoveSucesfull({j * m_columns + i, (j + 1) * m_columns + i}))
             return true;
