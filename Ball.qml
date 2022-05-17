@@ -31,6 +31,10 @@ Item {
                 NumberAnimation {
                     duration: animDuration / 2
                 }
+
+                ColorAnimation {
+                    duration: 1
+                }
             }
         }
     }

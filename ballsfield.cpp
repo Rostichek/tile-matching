@@ -106,7 +106,7 @@ void BallsField::createBalls() {
 
   for(size_t i = 0; i < m_rows * m_columns; i++) {
       indexes_to_remove.clear();
-      findBallsToRemove(i);
+      findBallsToRemove(i, i);
       if(indexes_to_remove.size() >= 3) {
           get(*indexes_to_remove.begin()) = getRandomColor();
           get(*indexes_to_remove.cbegin()) = getRandomColor();
@@ -129,6 +129,7 @@ void BallsField::selectBall(int index) {
   if(-1 == selected_idx) { // no one ball is selected
       selected_idx = index;
       emitDecoration(index);
+      qDebug() << palette.at(get(index)).c_str();
     }
   else if(index == selected_idx){ // this ball is selected
       selected_idx = -1;
@@ -147,14 +148,13 @@ void BallsField::selectBall(int index) {
     }
 }
 
-void BallsField::findBallsToRemove(size_t index, size_t iter) const {
-  static size_t basic;
-  if(!iter) basic = index;
+void BallsField::findBallsToRemove(size_t index, size_t basic) const {
   indexes_to_remove.insert(index);
 
   auto moveOn = [&](size_t second) {
-    if(get(second) == get(basic) && !indexes_to_remove.count(second))
-      findBallsToRemove(second, iter + 1);
+    if(get(second) == get(basic) && !indexes_to_remove.count(second)) {
+        findBallsToRemove(second, basic);
+      }
   };
 
   if(index && (index % m_columns)) // right
@@ -183,6 +183,7 @@ void BallsField::removeBallsGroup() {
   for(auto it = sorted_indexes.rbegin(); it != sorted_indexes.rend(); it++) {
       size_t index = *it;
       get(index) = getRandomColor();
+      emit dataChanged(this->index(index), this->index(index), { Qt::DisplayRole });
       size_t steps = m_rows - (index / m_columns) - 1;
       for(size_t i = 0; i < steps; i++) {
           swapUp(index + m_columns * i);
@@ -197,18 +198,22 @@ bool BallsField::findAllBallsGroup() {
 
   for(size_t i = 0; i < (m_rows / 2) * m_columns /* without unvisiable row */; i++) {
       indexes_to_remove.clear();
-      findBallsToRemove(i);
+      findBallsToRemove(i, i);
       if(indexes_to_remove.size() >= 3) {
+          for(auto& index : indexes_to_remove)
+            qDebug() << index << " - " << palette.at(get(index)).c_str();
+
           to_hide.insert(indexes_to_remove.begin(), indexes_to_remove.end());
           emit dataChanged(this->index(0), this->index(m_rows * m_columns - 1), { HiddenRole });
           removeBallsGroup();
-          group_found = true;
+          indexes_to_remove.clear();
+          return true;
         }
     }
 
   indexes_to_remove.clear();
 
-  return group_found;
+  return false;
 }
 
 bool BallsField::trySwap(size_t first,size_t second) {
@@ -216,7 +221,7 @@ bool BallsField::trySwap(size_t first,size_t second) {
 
   for(size_t ball_index : {first, second}) {
       indexes_to_remove.clear();
-      findBallsToRemove(ball_index);
+      findBallsToRemove(ball_index, ball_index);
       if(indexes_to_remove.size() >= 3) {
           return true;
         }

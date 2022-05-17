@@ -69,13 +69,13 @@ Item {
                         return
                     }
 
+                    _balls.is_all_groups_found = !_balls_model.findAllBallsGroup()
+
                     if (_balls.is_all_groups_found) {
                         if (!_balls_model.areThereMoreMoves())
                             _balls_model.endGame()
                         return
                     }
-
-                    _balls.is_all_groups_found = !_balls_model.findAllBallsGroup()
                 }
             }
         }

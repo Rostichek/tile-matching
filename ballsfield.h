@@ -69,7 +69,7 @@ private:
   bool move(const int);
 
   // recursively search for all identical balls that touch the index
-  void findBallsToRemove(size_t index, size_t iter = 0) const;
+  void findBallsToRemove(size_t index, size_t basic) const;
 
   // move away to the top all balls from indexes_to_remove
   void removeBallsGroup();
