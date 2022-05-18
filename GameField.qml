@@ -7,7 +7,7 @@ Item {
     id: root
 
     property int expectedScreenSize: _balls.cellHeight * (_balls_model.rows / 2 + 0.5)
-    property int animDuration: 1000
+    property int animDuration: 800
 
     Rectangle {
         rotation: 180
@@ -47,6 +47,7 @@ Item {
             }
 
             move: _ballsTransition
+            displaced: _ballsTransition
 
             transitions: Transition {
                 id: _ballsTransition
