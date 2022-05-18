@@ -36,6 +36,10 @@ public:
   // check is at least one move can be done
   Q_INVOKABLE bool areThereMoreMoves();
 
+  // compute how many points have to be added
+  // to the score after move
+  Q_INVOKABLE void computeScore();
+
   Q_PROPERTY(int columns MEMBER m_columns CONSTANT); // set by properties
   Q_PROPERTY(int rows MEMBER m_rows NOTIFY rowsChanged); // computing by screen height and columns number
   Q_PROPERTY(int score MEMBER m_score NOTIFY scoreChanged);
@@ -60,10 +64,6 @@ private:
   // emit to the view that the ball by the index
   // was selected or deselected
   void emitDecoration(size_t index);
-
-  // compute how many points have to be added
-  // to the score after move
-  void computeScore();
 
   // try to move selected ball to the index
   bool move(const int);
@@ -92,6 +92,7 @@ private:
   size_t m_score = 0;
   size_t m_steps = 0;
   size_t points_counter = 0;
+  size_t total_removes = 0;
   int selected_idx = -1;
 
   std::vector<std::vector<Color>> balls;

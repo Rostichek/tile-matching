@@ -52,7 +52,8 @@ int BallsField::getScore() const {
 }
 
 void BallsField::computeScore() {
-  m_score += exp(indexes_to_remove.size()*0.35);
+  m_score += exp(total_removes * 0.35);
+  total_removes = 0;
   emit scoreChanged();
   indexes_to_remove.clear();
 }
@@ -103,7 +104,6 @@ void BallsField::createBalls() {
         ball = getRandomColor();
     }
 
-
   for(size_t i = 0; i < m_rows * m_columns; i++) {
       indexes_to_remove.clear();
       findBallsToRemove(i, i);
@@ -117,19 +117,19 @@ void BallsField::createBalls() {
   indexes_to_remove.clear();
   endResetModel();
 
+  if(!areThereMoreMoves())
+    createBalls();
+
   m_score = 0;
   m_steps = 0;
   emit scoreChanged();
   emit stepsChanged();
-
-  return;
 }
 
 void BallsField::selectBall(int index) {
   if(-1 == selected_idx) { // no one ball is selected
       selected_idx = index;
       emitDecoration(index);
-      qDebug() << palette.at(get(index)).c_str();
     }
   else if(index == selected_idx){ // this ball is selected
       selected_idx = -1;
@@ -190,19 +190,14 @@ void BallsField::removeBallsGroup() {
         }
     }
 
-  computeScore();
+  total_removes += indexes_to_remove.size();
 }
 
 bool BallsField::findAllBallsGroup() {
-  bool group_found = false;
-
   for(size_t i = 0; i < (m_rows / 2) * m_columns /* without unvisiable row */; i++) {
       indexes_to_remove.clear();
       findBallsToRemove(i, i);
       if(indexes_to_remove.size() >= 3) {
-          for(auto& index : indexes_to_remove)
-            qDebug() << index << " - " << palette.at(get(index)).c_str();
-
           to_hide.insert(indexes_to_remove.begin(), indexes_to_remove.end());
           emit dataChanged(this->index(0), this->index(m_rows * m_columns - 1), { HiddenRole });
           removeBallsGroup();
@@ -210,9 +205,7 @@ bool BallsField::findAllBallsGroup() {
           return true;
         }
     }
-
   indexes_to_remove.clear();
-
   return false;
 }
 

@@ -73,6 +73,7 @@ Item {
                     _balls.is_all_groups_found = !_balls_model.findAllBallsGroup()
 
                     if (_balls.is_all_groups_found) {
+                        _balls_model.computeScore()
                         if (!_balls_model.areThereMoreMoves())
                             _balls_model.endGame()
                         return
