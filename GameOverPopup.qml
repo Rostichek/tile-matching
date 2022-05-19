@@ -1,7 +1,6 @@
 import QtQuick 2.0
-import BallsField 1.0
 import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.12
+import BallsField 1.0
 
 Popup {
     id: root
@@ -11,12 +10,14 @@ Popup {
     height: _window.height * 0.2
     modal: true
 
-    onClosed: _balls_model.createBalls()
+    onClosed: _ballsModel.createBalls()
 
     Text {
+        id: _victoryMessage
+
         anchors.centerIn: parent
 
-        text: "There are no more swaps\n\nYour result is " + _balls_model.score
-              + " points by " + _balls_model.steps + " steps"
+        text: "There are no more swaps\n\nYour result is " + _ballsModel.score
+              + " points by " + _ballsModel.steps + " steps"
     }
 }

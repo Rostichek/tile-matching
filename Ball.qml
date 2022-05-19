@@ -13,26 +13,32 @@ Item {
 
         anchors {
             fill: parent
-            margins: decoration ? 0 : 5
+            margins: selected ? 0 : 5
         }
         radius: width / 2
         color: display
 
         MouseArea {
+            id: _clickableArea
+
             anchors.fill: _circle
             hoverEnabled: true
             onClicked: select()
-            //            onExited: root.opacity = 1
-            //            onEntered: root.opacity = 0.5
         }
 
         Behavior on color {
             SequentialAnimation {
+                id: _colorAnimation
+
                 NumberAnimation {
+                    id: _pause
+
                     duration: animDuration / 2
                 }
 
                 ColorAnimation {
+                    id: _changeColor
+
                     duration: 1
                 }
             }
@@ -40,13 +46,16 @@ Item {
     }
 
     Behavior on opacity {
-
         SequentialAnimation {
+            id: _opacityAnimation
+
             onStopped: {
                 opacity = 1
             }
 
             NumberAnimation {
+                id: _toInvisible
+
                 property: "opacity"
                 from: 1
                 to: 0
@@ -54,18 +63,22 @@ Item {
             }
 
             NumberAnimation {
+                id: _toVisible
+
                 duration: animDuration / 2
             }
         }
     }
 
     InnerShadow {
+        id: _glare
+
         anchors.fill: _circle
         horizontalOffset: 3
         verticalOffset: 3
         radius: 8
         samples: 17
-        color: "#80000000"
+        color: "dimgrey"
         source: _circle
     }
 }

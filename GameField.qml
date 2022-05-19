@@ -1,47 +1,46 @@
 import QtQuick 2.0
 import BallsField 1.0
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.12
 
 Item {
     id: root
 
-    property int expectedScreenSize: _balls.cellHeight * (_balls_model.rows / 2 + 0.5)
+    readonly property real rowsWithContent: _ballsModel.rows / 2 + 0.5
+    property int expectedScreenSize: _balls.cellHeight * rowsWithContent
     property int animDuration: 800
 
     Rectangle {
+        id: _gameField
+
         rotation: 180
         anchors.fill: parent
         color: "white"
 
         GameOverPopup {
-            id: popup
+            id: _popup
         }
 
         GridView {
             id: _balls
 
-            property bool is_all_groups_found: false
+            property bool isAllGroupsFound: false
 
-            interactive: false
             anchors.fill: parent
-            cellHeight: _window.width / _balls_model.columns
+            cellHeight: _window.width / _ballsModel.columns
             cellWidth: cellHeight
+            interactive: false
 
-            model: BallsModel {
-                id: _balls_model
-                onEndGame: popup.open()
-            }
+            model: _ballsModel
 
             delegate: Ball {
                 width: _balls.cellHeight
                 height: _balls.cellHeight
 
-                onSelect: _balls_model.selectBall(index)
+                onSelect: _ballsModel.selectBall(index)
             }
 
             header: ScoreBar {
                 id: _scoreBar
+
                 width: root.width
                 height: _balls.cellHeight / 2
             }
@@ -49,16 +48,27 @@ Item {
             move: _ballsTransition
             displaced: _ballsTransition
 
+            BallsModel {
+                id: _ballsModel
+
+                onEndGame: _popup.open()
+            }
+
             transitions: Transition {
                 id: _ballsTransition
 
                 SequentialAnimation {
+                    id: _moveAnimation
 
                     NumberAnimation {
+                        id: _pause
+
                         duration: animDuration / 2
                     }
 
                     NumberAnimation {
+                        id: _move
+
                         properties: "x, y"
                         duration: animDuration / 3
                     }
@@ -66,16 +76,17 @@ Item {
 
                 onRunningChanged: {
                     if (running) {
-                        _balls.is_all_groups_found = false
+                        _balls.isAllGroupsFound = false
                         return
                     }
 
-                    _balls.is_all_groups_found = !_balls_model.findAllBallsGroup()
+                    _balls.isAllGroupsFound = !_ballsModel.findAllBallsGroup()
 
-                    if (_balls.is_all_groups_found) {
-                        _balls_model.computeScore()
-                        if (!_balls_model.areThereMoreMoves())
-                            _balls_model.endGame()
+                    if (_balls.isAllGroupsFound) {
+                        _ballsModel.computeScore()
+                        if (!_ballsModel.areThereMoreMoves()) {
+                            _ballsModel.endGame()
+                        }
                         return
                     }
                 }

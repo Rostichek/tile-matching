@@ -1,7 +1,7 @@
 import QtQuick 2.0
-import BallsField 1.0
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
+import BallsField 1.0
 
 Rectangle {
     id: root
@@ -10,34 +10,50 @@ Rectangle {
     color: "lightgray"
 
     RowLayout {
+        id: _menu
+
         anchors.fill: parent
 
         Button {
+            id: _restart
+
             Layout.preferredWidth: root.width / 3
             Layout.preferredHeight: root.height
+
             text: "Restart"
-            onClicked: _balls_model.createBalls()
+
+            onClicked: _ballsModel.createBalls()
         }
         Item {
-            id: _score
+            id: _scoreContainer
+
             Layout.preferredWidth: root.width / 3
             Layout.preferredHeight: root.height
+
             Text {
-                anchors.fill: _score
+                id: _scoreText
+
+                anchors.fill: _scoreContainer
                 horizontalAlignment: Text.AlignHCenter
                 anchors.topMargin: (root.height - font.pixelSize) / 3
-                text: "Score: " + _balls_model.score
+
+                text: "Score: " + _ballsModel.score
             }
         }
         Item {
-            id: _steps
+            id: _stepsContainer
+
             Layout.preferredWidth: root.width / 3
             Layout.preferredHeight: root.height
+
             Text {
-                anchors.fill: _steps
+                id: _stepsText
+
+                anchors.fill: _stepsContainer
                 horizontalAlignment: Text.AlignHCenter
                 anchors.topMargin: (root.height - font.pixelSize) / 3
-                text: "Steps: " + _balls_model.steps
+
+                text: "Steps: " + _ballsModel.steps
             }
         }
     }
