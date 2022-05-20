@@ -20,6 +20,7 @@ Rectangle {
             Layout.preferredWidth: root.width / 3
             Layout.preferredHeight: root.height
 
+            font.pointSize: root.height / 4
             text: "Restart"
 
             onClicked: _ballsModel.createBalls()
@@ -35,8 +36,9 @@ Rectangle {
 
                 anchors.fill: _scoreContainer
                 horizontalAlignment: Text.AlignHCenter
-                anchors.topMargin: (root.height - font.pixelSize) / 3
+                verticalAlignment: Text.AlignVCenter
 
+                font.pointSize: root.height / 4
                 text: "Score: " + _ballsModel.score
             }
         }
@@ -51,8 +53,9 @@ Rectangle {
 
                 anchors.fill: _stepsContainer
                 horizontalAlignment: Text.AlignHCenter
-                anchors.topMargin: (root.height - font.pixelSize) / 3
+                verticalAlignment: Text.AlignVCenter
 
+                font.pointSize: root.height / 4
                 text: "Steps: " + _ballsModel.steps
             }
         }
