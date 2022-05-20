@@ -38,7 +38,7 @@ public:
     Q_INVOKABLE bool areThereMoreMoves();
 
     // compute how many points have to be added
-    // to the score after move
+    // to the score after moves
     Q_INVOKABLE void computeScore();
 
     Q_PROPERTY(int columns MEMBER m_columns CONSTANT); // set by properties
